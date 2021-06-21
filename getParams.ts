@@ -3,7 +3,7 @@
  * На выходе: строка. Пример: ?a=1&b=2&c=[object Object]&k=1,2,3
  */
 
-function queryStringify(data: object): string {
+function queryStringify(data: Record<string, number | object>): string {
   const params = (<any>Object)
     .entries(data)
     .reduce(
