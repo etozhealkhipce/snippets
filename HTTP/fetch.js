@@ -18,10 +18,27 @@ class HTTPTransport {
     return this.request(url, { ...options, method: METHODS.GET });
   };
 
+  post = (url, options = {}) => {
+    return this.request(url, { ...options, method: METHODS.POST });
+  };
+
+  put = (url, options = {}) => {
+    return this.request(url, { ...options, method: METHODS.PUT });
+  };
+
+  delete = (url, options = {}) => {
+    return this.request(url, { ...options, method: METHODS.DELETE });
+  };
+
   request = (url, options) => {
-    const { method, data, timeout, headers } = options;
+    const { method, data, timeout, headers = {} } = options;
 
     return new Promise((resolve, reject) => {
+      if (!method) {
+        reject("No method");
+        return;
+      }
+
       const xhr = new XMLHttpRequest();
 
       if (method === METHODS.GET) {
@@ -30,10 +47,13 @@ class HTTPTransport {
         xhr.open(method, url);
       }
 
-      xhr.timeout = timeout;
-      Object.entries(headers).forEach(([key, value]) => {
-        xhr.setRequestHeader(key, value);
+      Object.keys(headers).forEach((key) => {
+        xhr.setRequestHeader(key, headers[key]);
       });
+      xhr.onabort = reject;
+      xhr.onerror = reject;
+      xhr.timeout = timeout;
+      xhr.ontimeout = reject;
 
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
