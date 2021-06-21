@@ -2,6 +2,11 @@ const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 const METHODS = {
   GET: "GET",
+  POST: "POST",
+  PUT: "PUT",
+  DELETE: "DELETE",
+  UPDATE: "UPDATE",
+  PATCH: "PATCH",
 };
 
 function queryStringify(data) {
