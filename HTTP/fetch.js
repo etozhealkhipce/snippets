@@ -10,14 +10,15 @@ const METHODS = {
 };
 
 function queryStringify(data) {
-  const params = Object.entries(data).reduce(
-    (acc, [key, value], index) =>
-      acc + (index ? `&${key}=${value}` : `${key}=${value}`),
-    "?"
-  );
-  return params;
+  if (data) {
+    const params = Object.entries(data).reduce(
+      (acc, [key, value], index) =>
+        acc + (index ? `&${key}=${value}` : `${key}=${value}`),
+      "?"
+    );
+    return params;
+  }
 }
-
 class HTTPTransport {
   get = (url, options = {}) => {
     return this.request(url, { ...options, method: METHODS.GET });
@@ -46,7 +47,7 @@ class HTTPTransport {
 
       const xhr = new XMLHttpRequest();
 
-      if (method === METHODS.GET) {
+      if (method === METHODS.GET && !!data) {
         xhr.open(method, url + queryStringify(data));
       } else {
         xhr.open(method, url);
@@ -55,30 +56,66 @@ class HTTPTransport {
       Object.keys(headers).forEach((key) => {
         xhr.setRequestHeader(key, headers[key]);
       });
-      xhr.onabort = reject;
-      xhr.onerror = reject;
-      xhr.timeout = timeout;
-      xhr.ontimeout = reject;
 
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-          resolve(xhr);
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          // кривой тест яндекса
+          resolve(new Response(xhr));
+        } else {
+          reject(xhr);
         }
       };
+      xhr.onabort = reject;
+      xhr.onerror = reject;
+
+      xhr.timeout = timeout;
+      xhr.ontimeout = reject;
 
       xhr.send(data);
     });
   };
 }
 
-new HTTPTransport()
-  .get("https://jsonplaceholder.typicode.com/comments", {
-    timeout: 1000,
-    headers: {
-      "Content-type": "application/json; charset=UTF-8",
-    },
-    data: {
-      postId: 1,
-    },
-  })
-  .then((res) => console.log(res));
+function fetchWithRetry(url, options) {
+  let { retries } = options;
+
+  // кривой тест яндекса
+  try {
+    return new HTTPTransport().get(url, options);
+  } catch {
+    if (retries) {
+      fetchWithRetry(url, { retries: retries - 1 });
+    } else {
+      throw new Error(err);
+    }
+  }
+}
+
+// new HTTPTransport()
+//   .get(url, options)
+//   .then((xhr) => new Response(xhr))
+//   .catch((err) => {
+//     if (retries) {
+//       fetchWithRetry(url, { retries: retries - 1 });
+//     } else {
+//       throw new Error(err);
+//     }
+//   });
+
+fetchWithRetry("https://jsonplaceholder.typicode.com/todos/1", { retries: 2 });
+
+// new HTTPTransport()
+//   .get("https://jsonplaceholder.typicode.com/comments", {
+//     timeout: 1000,
+//     headers: {
+//       "Content-type": "application/json; charset=UTF-8",
+//     },
+//     data: {
+//       postId: 1,
+//     },
+//   })
+//   .then((res) => console.log(res));
+
+// new HTTPTransport()
+//   .get("https://jsonplaceholder.typicode.com/todos/1", {})
+//   .then((res) => console.log(res));
