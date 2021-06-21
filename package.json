@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "typescript": "^4.3.4"
+  },
+  "dependencies": {
+    "xmlhttprequest": "^1.8.0"
   }
 }
