@@ -15,6 +15,16 @@ const data = {
   title: "",
 };
 
-Object.defineProperty(data, "title", {});
+input.addEventListener("keyup", (e) => {
+  if (e !== null) {
+    data.title = e.target.value;
+  }
+});
+
+Object.defineProperty(data, "title", {
+  set(newVal) {
+    text.textContent = newVal;
+  },
+});
 
 export default Nullable;
