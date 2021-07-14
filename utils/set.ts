@@ -20,8 +20,8 @@ function set(
   for (let i = 0; i <= splitPath.length - 1; i++) {
     const path = splitPath.length ? splitPath.slice(i + 1).join(".") : null;
     if (path) {
-      const test = {};
-      (object as object)[splitPath[i]] = set(test, path, value);
+      const buffer = {};
+      (object as object)[splitPath[i]] = set(buffer, path, value);
     } else {
       (object as object)[splitPath[i]] = value;
     }
