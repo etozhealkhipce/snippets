@@ -4,10 +4,10 @@ type PlainObject<T = unknown> = {
 
 function isPlainObject(value: unknown): value is PlainObject {
   return (
-    typeof value === 'object' &&
+    typeof value === "object" &&
     value !== null &&
     value.constructor === Object &&
-    Object.prototype.toString.call(value) === '[object Object]'
+    Object.prototype.toString.call(value) === "[object Object]"
   );
 }
 
@@ -25,7 +25,6 @@ function cloneDeep<T extends object = object>(obj: T) {
   if (isArrayOrObject(obj)) {
     if (isArray(obj)) {
       copy = [];
-      if (!obj.length) return copy;
 
       for (var i = 0; i < obj.length; i++) {
         const t = obj as any;
@@ -40,15 +39,15 @@ function cloneDeep<T extends object = object>(obj: T) {
 
     if (isPlainObject(obj)) {
       copy = {};
-      if (!Object.keys(obj)) return copy;
+      const keys = Object.keys(obj);
 
-      for (var i = 0; i < Object.keys(obj).length; i++) {
+      for (var i = 0; i < keys.length; i++) {
         const t = obj as any;
 
-        if (isArrayOrObject(t[Object.keys(obj)[i]])) {
-          copy[Object.keys(obj)[i]] = cloneDeep(t[Object.keys(obj)[i]]);
+        if (isArrayOrObject(t[keys[i]])) {
+          copy[keys[i]] = cloneDeep(t[keys[i]]);
         } else {
-          copy[Object.keys(obj)[i]] = t[Object.keys(obj)[i]];
+          copy[keys[i]] = t[keys[i]];
         }
       }
     }
